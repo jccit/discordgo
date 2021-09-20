@@ -833,12 +833,15 @@ func (v *VoiceConnection) opusReceiver(udpConn *net.UDPConn, close <-chan struct
 
 		// extension bit set, and not a RTCP packet
 		if ((recvbuf[0] & 0x10) == 0x10) && ((recvbuf[1] & 0x80) == 0) {
-			// get extended header length
-			extlen := binary.BigEndian.Uint16(p.Opus[2:4])
-			// 4 bytes (ext header header) + 4*extlen (ext header data)
-			shift := int(4 + 4*extlen)
-			if len(p.Opus) > shift {
-				p.Opus = p.Opus[shift:]
+			// check if we have a valid packet
+			if len(p.Opus) >= 4 {
+				// get extended header length
+				extlen := binary.BigEndian.Uint16(p.Opus[2:4])
+				// 4 bytes (ext header header) + 4*extlen (ext header data)
+				shift := int(4 + 4*extlen)
+				if len(p.Opus) > shift {
+					p.Opus = p.Opus[shift:]
+				}
 			}
 		}
 
